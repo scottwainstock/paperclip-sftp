@@ -51,7 +51,6 @@ module Paperclip
 
       def flush_writes #:nodoc:
         @queued_for_write.each do |style, file|
-          mkdir_p(File.dirname(path(style)))
           log("uploading #{file.path} to #{path(style)}")
           sftp.upload!(file.path, path(style))
           sftp.setstat!(path(style), :permissions => 0644)
@@ -82,22 +81,6 @@ module Paperclip
         end
 
         @queued_for_delete = []
-      end
-
-      private
-
-      # Create directory structure.
-      #
-      def mkdir_p(remote_directory)
-        log("mkdir_p for #{remote_directory}")
-        root_directory = '/'
-        remote_directory.split('/').each do |directory|
-          next if directory.blank?
-          unless sftp.dir.entries(root_directory).map(&:name).include?(directory)
-            sftp.mkdir!("#{root_directory}#{directory}")
-          end
-          root_directory += "#{directory}/"
-        end
       end
 
     end
